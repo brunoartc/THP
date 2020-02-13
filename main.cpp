@@ -3,12 +3,7 @@
 #include <string.h> 
 using namespace std; 
 
-#ifndef _TESTS
-int main(int argc, char const *argv[]){
 
-    return 0;
-}
-#endif
 
 
 
@@ -47,10 +42,16 @@ stack<int> reverse_polish(string s1){
         int x, y;
         for(unsigned i = 0; i < iter_operators->size(); ++i)
         {
+            
             string result_string = (*iter_operators)[i];
+            if (number_stack.size() < 2){
+                cout << "WARN:\tInput Error\n";
+                break;
+            } 
             switch (result_string[0])
             {
             case '+':
+                
                 x = number_stack.top();
                 number_stack.pop();
                 y = number_stack.top();
@@ -76,8 +77,15 @@ stack<int> reverse_polish(string s1){
     }
 
     if (number_stack.size() != 1){
-        cout << "WARN:\tInput Error";
+        cout << "WARN:\tInput Error\n";
     }
     
     return number_stack;
 }
+
+#ifndef _TESTS
+int main(int argc, char const *argv[]){
+    cout << reverse_polish(argv[1]).top();
+    return 0;
+}
+#endif
