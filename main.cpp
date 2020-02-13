@@ -58,10 +58,6 @@ stack<int> reverse_polish(string s1){
                 number_stack.pop();
                 x = number_stack.top();
                 number_stack.pop();
-                cout << x;
-                cout << '+';
-                cout << y;
-                cout << "\n";
 
 
                 number_stack.push(x+y);
@@ -71,11 +67,6 @@ stack<int> reverse_polish(string s1){
                 number_stack.pop();
                 x = number_stack.top();
                 number_stack.pop();
-
-                cout << x;
-                cout << '-';
-                cout << y;
-                cout << "\n";
 
                 number_stack.push(x-y);
                 break;
@@ -98,7 +89,7 @@ stack<int> reverse_polish(string s1){
 #ifndef _TESTS
 int main(int argc, char const *argv[]){
     cout << reverse_polish(argv[1]).top();
-    cout << "\n"
+    cout << "\n";
     return 0;
 }
 #endif
