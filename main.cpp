@@ -16,8 +16,10 @@ stack<int> reverse_polish(string s1){
 
 
     sregex_iterator iter_numbers(s1.begin(), s1.end(), numbers);
+    string s2 = s1;
+    reverse(s2.begin(), s2.end()); 
 
-    sregex_iterator iter_operators(s1.begin(), s1.end(), operators);
+    sregex_iterator iter_operators(s2.begin(), s2.end(), operators);
     sregex_iterator end;
 
     stack <int> number_stack;
@@ -52,18 +54,28 @@ stack<int> reverse_polish(string s1){
             {
             case '+':
                 
-                x = number_stack.top();
-                number_stack.pop();
                 y = number_stack.top();
                 number_stack.pop();
+                x = number_stack.top();
+                number_stack.pop();
+                cout << x;
+                cout << '+';
+                cout << y;
+                cout << "\n";
+
 
                 number_stack.push(x+y);
                 break;
             case '-':
-                x = number_stack.top();
-                number_stack.pop();
                 y = number_stack.top();
                 number_stack.pop();
+                x = number_stack.top();
+                number_stack.pop();
+
+                cout << x;
+                cout << '-';
+                cout << y;
+                cout << "\n";
 
                 number_stack.push(x-y);
                 break;
@@ -86,6 +98,7 @@ stack<int> reverse_polish(string s1){
 #ifndef _TESTS
 int main(int argc, char const *argv[]){
     cout << reverse_polish(argv[1]).top();
+    cout << "\n"
     return 0;
 }
 #endif
