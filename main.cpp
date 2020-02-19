@@ -55,7 +55,7 @@ int eval_postfix(string postfix_exp){
 
     regex operators(R"([+\-*/])");
     
-	for(int i = 0;i< postfix_exp.length();i++) {
+	for(int i = 0;i< postfix_exp.size();i++) {
 
         smatch sm;
 
@@ -70,7 +70,8 @@ int eval_postfix(string postfix_exp){
             postfix_stack.push(operand1 - operand2);
             break;
 
-        case '+':        
+        case '+': 
+               
             operand2 = postfix_stack.top(); postfix_stack.pop();
 			operand1 = postfix_stack.top(); postfix_stack.pop();
             postfix_stack.push(operand1 + operand2);
@@ -80,10 +81,11 @@ int eval_postfix(string postfix_exp){
 
 
         default:
-            int end_num = postfix_exp.find(' ');
-            int num = stoi(postfix_exp.substr(i, end_num));
-            i += end_num-1;
-			postfix_stack.push(num);
+            int end_num = postfix_exp.substr(i).find(' ') + i;
+            postfix_stack.push(stoi(postfix_exp.substr(i, end_num)));
+
+            i += end_num - i;
+            
             break;
         }
 	}
