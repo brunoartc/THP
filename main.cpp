@@ -4,91 +4,99 @@
 using namespace std; 
 
 
+string to_postfix(const string s1){
 
+    regex infix(R"(([0-9]+)([+\-*/][0-9]+)*)");
 
+    smatch sm;
 
+    if (regex_match(s1, sm, infix) != true) throw 666;
 
+    string output;
+    stack<int> operator_stack;
 
+    map<char, int> precedence;
 
-stack<int> reverse_polish(string s1){
-    regex numbers(R"([0-9]+)");
-    regex operators(R"([+\-*/%])");
+    precedence.insert({'-', 1});
+    precedence.insert({'+', 1});
+    precedence.insert({'/', 2});
+    precedence.insert({'*', 2});
 
-
-    sregex_iterator iter_numbers(s1.begin(), s1.end(), numbers);
-    string s2 = s1;
-    reverse(s2.begin(), s2.end()); 
-
-    sregex_iterator iter_operators(s2.begin(), s2.end(), operators);
-    sregex_iterator end;
-
-    stack <int> number_stack;
-
-
-    while(iter_numbers != end)
-    {
-
-        for(unsigned i = 0; i < iter_numbers->size(); ++i)
-        {
-            number_stack.push(stoi((*iter_numbers)[i]));
-
-        }
-        ++iter_numbers;
-    }
-
-
-
-
-    while(iter_operators != end)
-    {
-        int x, y;
-        for(unsigned i = 0; i < iter_operators->size(); ++i)
-        {
+    for (int i = 0; i < s1.size(); i++){
+        if (isdigit(s1[i])){
+            int num = 0;
+            while(i<s1.length() && isdigit(s1[i])) {
+				num = (num*10) + (s1[i] - '0'); 
+				i++;
+			}
+            i--;
+            output += to_string(num)+ ' ';
+        } else if (s1[i] == '-' | s1[i] == '+' ){
+            while (operator_stack.size() != 0 && precedence.at(s1[i]) <= precedence.at(operator_stack.top())){
+                output += operator_stack.top();
+                operator_stack.pop();
+            };
             
-            string result_string = (*iter_operators)[i];
-            if (number_stack.size() < 2){
-                cout << "WARN:\tInput Error\n";
-                break;
-            } 
-            switch (result_string[0])
-            {
-            case '+':
-                
-                y = number_stack.top();
-                number_stack.pop();
-                x = number_stack.top();
-                number_stack.pop();
-
-
-                number_stack.push(x+y);
-                break;
-            case '-':
-                y = number_stack.top();
-                number_stack.pop();
-                x = number_stack.top();
-                number_stack.pop();
-
-                number_stack.push(x-y);
-                break;
-            
-            default:
-                break;
-            }
-
+            operator_stack.push(s1[i]);
         }
-        ++iter_operators;
     }
 
-    if (number_stack.size() != 1){
-        cout << "WARN:\tInput Error\n";
+    while (operator_stack.size() != 0){
+        output += operator_stack.top();
+        operator_stack.pop();
     }
-    
-    return number_stack;
+
+    return output;
 }
+
+int eval_postfix(string postfix_exp){
+	stack<int> postfix_stack;
+
+
+    regex operators(R"([+\-*/])");
+    
+	for(int i = 0;i< postfix_exp.length();i++) {
+
+        smatch sm;
+
+        int operand2, operand1;
+        switch (postfix_exp[i])
+        {
+            
+            
+        case '-':        
+            operand2 = postfix_stack.top(); postfix_stack.pop();
+			operand1 = postfix_stack.top(); postfix_stack.pop();
+            postfix_stack.push(operand1 - operand2);
+            break;
+
+        case '+':        
+            operand2 = postfix_stack.top(); postfix_stack.pop();
+			operand1 = postfix_stack.top(); postfix_stack.pop();
+            postfix_stack.push(operand1 + operand2);
+            break;
+        case ' ':
+            break;
+
+
+        default:
+            int end_num = postfix_exp.find(' ');
+            int num = stoi(postfix_exp.substr(i, end_num));
+            i += end_num-1;
+			postfix_stack.push(num);
+            break;
+        }
+	}
+    
+	return postfix_stack.top();
+}
+
+
+
 
 #ifndef _TESTS
 int main(int argc, char const *argv[]){
-    cout << reverse_polish(argv[1]).top();
+    cout << eval_postfix(to_postfix(argv[1]));
     cout << "\n";
     return 0;
 }
