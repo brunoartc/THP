@@ -60,20 +60,20 @@ class Parser {
 
     stack<int> s_digits;
     stack<char> s_operators;
-    bool digi_flag = false;
+    int digi_multi = 0;
     while (tokens->position < tokens->origin.length())  // TODO fix
     {
       if (tokens->get_type() == "DIGIT") {
         int tmp = 0;
-        if (digi_flag) {
-          tmp = s_digits.top() * 10 + (tokens->get_value() - '0');
+        if (digi_multi) {
+          tmp = s_digits.top()  + ((tokens->get_value() - '0') * 10 * digi_multi); s_digits.pop();
         } else {
           tmp = (tokens->get_value() - '0');
         }
-        digi_flag = true;
+        digi_multi += 1;
         s_digits.push(tmp);
       } else if (tokens->get_type() == "OPERATOR") {
-        digi_flag = false;
+        digi_multi = 0;
         s_operators.push(tokens->get_value());
       }
       tokens->select_next();
