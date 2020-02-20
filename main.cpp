@@ -91,8 +91,8 @@ class Parser {
 
             while (s_operators.size() > 0)
             {   
-                int y = s_digits.top(); s_digits.pop();
                 int x = s_digits.top(); s_digits.pop();
+                int y = s_digits.top(); s_digits.pop();
 
                 //cout << x;
 
@@ -131,8 +131,11 @@ class Parser {
 int main(int argc, char const *argv[])
 {
     Parser* parser = new Parser();
+    string code = argv[1];
+    reverse(code.begin(), code.end());
+    
 
-    cout << parser->run(argv[1]) << endl;
+    cout << parser->run(code) << endl;
     return 0;
 }
 #endif
