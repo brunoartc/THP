@@ -99,6 +99,16 @@ class Parser {
           s_digits.push(x - y);
           break;
 
+        case '*':
+          s_operators.pop();
+          s_digits.push(x * y);
+          break;
+
+        case '/':
+          s_operators.pop();
+          s_digits.push(x / y);
+          break;
+
         default:
           break;
       }
