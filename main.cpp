@@ -1,105 +1,135 @@
-#include <iostream> 
-#include <regex> 
-#include <string.h> 
-using namespace std; 
+#include <string.h>
+#include <iostream>
+#include <regex>
+using namespace std;
 
+class Token {
+ public:
+  string type;
+  int value;
+  Token(int _value) {
+    value = _value;
+    type = extract_type(_value);
+  }
+  string extract_type(int value) {
+    if (isdigit(value))
+      return "DIGIT";
+    else if (value == '-' | value == '+')
+      return "OPERATOR";
+    else
+      return "NULL";
+  }
+  string get_type() { return type; }
+};
 
-string to_postfix(const string s1){
+class Tokenizer {
+ public:
+  string origin;
+  int position = 0;
+  Token* actual;
+  Tokenizer(string _origin) {
+    origin = _origin;
+    actual = new Token(origin.at(position));
+  }
 
-    regex infix(R"(([0-9]+)([+\-*/][0-9]+)*)");
+  void select_next() {
+    if (position < origin.length()) {
+      position++;
+      if (position == origin.length()) {
+        actual->value = -1;
+        actual->type = "EOL";
+      } else {
+        actual->value = origin.at(position);
+        actual->type = actual->extract_type(actual->value);
+      }
+    } else {
+      // EOF
+    }
+  }
+  string get_type() { return actual->type; }
+  int get_value() { return actual->value; }
+};
 
-    smatch sm;
+class Parser {
+ public:
+  Tokenizer* tokens;
+  int parse_expression() {
+    /**
+     * PARSING TOKENS TO STACK
+     **/
 
-    if (regex_match(s1, sm, infix) != true) throw 666;
-
-    string output;
-    stack<int> operator_stack;
-
-    map<char, int> precedence;
-
-    precedence.insert({'-', 1});
-    precedence.insert({'+', 1});
-    precedence.insert({'/', 2});
-    precedence.insert({'*', 2});
-
-    for (int i = 0; i < s1.size(); i++){
-        if (isdigit(s1[i])){
-            int num = 0;
-            while(i<s1.length() && isdigit(s1[i])) {
-				num = (num*10) + (s1[i] - '0'); 
-				i++;
-			}
-            i--;
-            output += to_string(num)+ ' ';
-        } else if (s1[i] == '-' | s1[i] == '+' ){
-            while (operator_stack.size() != 0 && precedence.at(s1[i]) <= precedence.at(operator_stack.top())){
-                output += operator_stack.top();
-                operator_stack.pop();
-            };
-            
-            operator_stack.push(s1[i]);
+    stack<int> s_digits;
+    stack<char> s_operators;
+    int digi_multi = 0;
+    while (tokens->position < tokens->origin.length())  // TODO fix
+    {
+      if (tokens->get_type() == "DIGIT") {
+        int tmp = 0;
+        if (digi_multi) {
+          tmp = s_digits.top()  + ((tokens->get_value() - '0') * 10 * digi_multi); s_digits.pop();
+        } else {
+          tmp = (tokens->get_value() - '0');
         }
+        digi_multi += 1;
+        s_digits.push(tmp);
+      } else if (tokens->get_type() == "OPERATOR") {
+        digi_multi = 0;
+        s_operators.push(tokens->get_value());
+      }
+      tokens->select_next();
     }
 
-    while (operator_stack.size() != 0){
-        output += operator_stack.top();
-        operator_stack.pop();
-    }
+    /**
+     * EVALUATING STACK
+     **/
 
-    return output;
-}
+    while (s_operators.size() > 0) {
+      int x = s_digits.top();
+      s_digits.pop();
+      int y = s_digits.top();
+      s_digits.pop();
 
-int eval_postfix(string postfix_exp){
-	stack<int> postfix_stack;
+      switch (s_operators.top()) {
+        case '+':
+          s_operators.pop();
+          s_digits.push(x + y);
+          break;
+        case '-':
+          s_operators.pop();
+          s_digits.push(x - y);
+          break;
 
+        case '*':
+          s_operators.pop();
+          s_digits.push(x * y);
+          break;
 
-    regex operators(R"([+\-*/])");
-    
-	for(int i = 0;i< postfix_exp.size();i++) {
-
-        smatch sm;
-
-        int operand2, operand1;
-        switch (postfix_exp[i])
-        {
-            
-            
-        case '-':        
-            operand2 = postfix_stack.top(); postfix_stack.pop();
-			operand1 = postfix_stack.top(); postfix_stack.pop();
-            postfix_stack.push(operand1 - operand2);
-            break;
-
-        case '+': 
-               
-            operand2 = postfix_stack.top(); postfix_stack.pop();
-			operand1 = postfix_stack.top(); postfix_stack.pop();
-            postfix_stack.push(operand1 + operand2);
-            break;
-        case ' ':
-            break;
-
+        case '/':
+          s_operators.pop();
+          s_digits.push(x / y);
+          break;
 
         default:
-            int end_num = postfix_exp.substr(i).find(' ') + i;
-            postfix_stack.push(stoi(postfix_exp.substr(i, end_num)));
+          break;
+      }
+    }
 
-            i += end_num - i;
-            
-            break;
-        }
-	}
-    
-	return postfix_stack.top();
-}
+    return s_digits.top();
+  }
 
-
-
+  int run(string code) {
+    tokens = new Tokenizer(code);
+    return parse_expression();
+  }
+};
 
 #ifndef _TESTS
-int main(int argc, char const *argv[]){
-    cout << eval_postfix(to_postfix(argv[1]));
-    cout << "\n";
-    return 0;
+int main(int argc, char const* argv[]) {
+  Parser* parser = new Parser();
+  string code = argv[1];
+  reverse(code.begin(), code.end());
+
+  cout << parser->run(code) << endl;
+  return 0;
 }
 #endif
