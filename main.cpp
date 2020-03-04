@@ -1,6 +1,7 @@
 #include <string.h>
 #include <iostream>
 #include <regex>
+#include <math.h>
 using namespace std;
 
 class Token {
@@ -16,6 +17,8 @@ class Token {
       return "DIGIT";
     else if (value == '-' | value == '+')
       return "OPERATOR";
+    else if (value == ' ')
+      return "SPACE";
     else
       return "NULL";
   }
@@ -43,7 +46,7 @@ class Tokenizer {
         actual->type = actual->extract_type(actual->value);
       }
     } else {
-      // EOF
+      // EOF or SPACE
     }
   }
   string get_type() { return actual->type; }
@@ -66,7 +69,7 @@ class Parser {
       if (tokens->get_type() == "DIGIT") {
         int tmp = 0;
         if (digi_multi) {
-          tmp = s_digits.top()  + ((tokens->get_value() - '0') * 10 * digi_multi); s_digits.pop();
+          tmp = s_digits.top()  + ((tokens->get_value() - '0') * pow(10, digi_multi)); s_digits.pop();
         } else {
           tmp = (tokens->get_value() - '0');
         }
@@ -75,6 +78,7 @@ class Parser {
       } else if (tokens->get_type() == "OPERATOR") {
         digi_multi = 0;
         s_operators.push(tokens->get_value());
+      } else if (tokens->get_type() == "SPACE"){
       }
       tokens->select_next();
     }
@@ -82,6 +86,7 @@ class Parser {
     /**
      * EVALUATING STACK
      **/
+
 
     while (s_operators.size() > 0) {
       int x = s_digits.top();
@@ -99,21 +104,10 @@ class Parser {
           s_digits.push(x - y);
           break;
 
-        case '*':
-          s_operators.pop();
-          s_digits.push(x * y);
-          break;
-
-        case '/':
-          s_operators.pop();
-          s_digits.push(x / y);
-          break;
-
         default:
           break;
       }
     }
-
     return s_digits.top();
   }
 
