@@ -4,14 +4,21 @@
 #include <string.h> 
 using namespace std; 
 
-string to_postfix(const string s1){
+string to_postfix(const string s1_raw){
+
+    //PRE-PROCESSING
+    regex comment("/\\*.*?\\*/");
+    regex space(" ");
+
+    const string s1 = regex_replace(regex_replace(s1_raw,comment, ""), space, "");
 
     regex infix(R"(([0-9]+)([+\-*/][0-9]+)*)");
 
     smatch sm;
-
-    if (regex_match(s1, sm, infix) != true) throw 666;
-
+    if (regex_match(s1, sm, infix) != true) {
+        //cout << "Not"; NOT NEEDED
+        //throw 666;
+    }
     string output;
     stack<int> operator_stack;
 
@@ -21,6 +28,8 @@ string to_postfix(const string s1){
     precedence.insert({'+', 1});
     precedence.insert({'/', 2});
     precedence.insert({'*', 2});
+    precedence.insert({'(', 3});
+    precedence.insert({')', 3});
 
     for (int i = 0; i < s1.size(); i++){
         if (isdigit(s1[i])){
@@ -31,15 +40,24 @@ string to_postfix(const string s1){
 			}
             i--;
             output += to_string(num)+ ' ';
-        } else if (s1[i] == '-' | s1[i] == '+' ){
-            while (operator_stack.size() != 0 && precedence.at(s1[i]) <= precedence.at(operator_stack.top())){
+        } else if ((s1[i] == '-' | s1[i] == '+' | s1[i] == '*' | s1[i] == '/')){
+            while (operator_stack.size() != 0 && precedence.at(s1[i]) <= precedence.at(operator_stack.top()) && operator_stack.top() != '('){
                 output += operator_stack.top();
                 operator_stack.pop();
             };
             
             operator_stack.push(s1[i]);
+        } else if (s1[i] == '(') {
+            operator_stack.push(s1[i]);
+        } else if (s1[i] == ')') {
+            while (operator_stack.top() != '(') {
+                output += operator_stack.top();
+                operator_stack.pop();
+
+            }
+            operator_stack.pop();
         }
-    }
+    } 
 
     while (operator_stack.size() != 0){
         output += operator_stack.top();
@@ -76,7 +94,18 @@ int eval_postfix(string postfix_exp){
 			operand1 = postfix_stack.top(); postfix_stack.pop();
             postfix_stack.push(operand1 + operand2);
             break;
-        case ' ':
+        case '*': 
+               
+            operand2 = postfix_stack.top(); postfix_stack.pop();
+			operand1 = postfix_stack.top(); postfix_stack.pop();
+            postfix_stack.push(operand1 * operand2);
+            break;
+
+        case '/': 
+               
+            operand2 = postfix_stack.top(); postfix_stack.pop();
+			operand1 = postfix_stack.top(); postfix_stack.pop();
+            postfix_stack.push(operand1 / operand2);
             break;
 
 
