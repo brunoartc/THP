@@ -1,11 +1,11 @@
+#include <math.h>
 #include <string.h>
+
 #include <iostream>
 #include <regex>
-#include <math.h>
+
 #include "nodes.cpp"
 using namespace std;
-
-#define DUBUG 1;
 
 #define UNKNOWNTOKEN 1;
 #define UNEXPECTEDTOKEN 2;
@@ -32,7 +32,7 @@ class Token {
       return "SPACE";
     else
       throw UNKNOWNTOKEN;
-      return "NULL";
+    return "NULL";
   }
   string get_type() { return type; }
 };
@@ -56,9 +56,9 @@ class Tokenizer {
         actual->value = origin.at(position);
         actual->type = actual->extract_type(actual->value);
       }
-      
+
       position++;
-      
+
     } else {
       // EOF or SPACE
     }
@@ -70,26 +70,23 @@ class Tokenizer {
 class Parser {
  public:
   Tokenizer* tokens;
-  static Node parse_expression(Tokenizer *tokens) {
+  static Node parse_expression(Tokenizer* tokens) {
     Node output = parse_term(tokens);
 
-
-    while (tokens->get_type() == "UNOP"){
+    while (tokens->get_type() == "UNOP") {
       int token = tokens->get_value();
       vector<Node> partial_output;
       partial_output.push_back(output);
-        partial_output.push_back(parse_term(tokens));
-        output = UnOp(token, partial_output);
+      partial_output.push_back(parse_term(tokens));
+      output = UnOp(token, partial_output);
     }
     return output;
   }
 
-
-  static Node parse_term(Tokenizer *tokens) {
+  static Node parse_term(Tokenizer* tokens) {
     Node output = parse_fator(tokens);
 
-
-    while (tokens->get_type() == "UNOP"){
+    while (tokens->get_type() == "BIOP") {
       int token = tokens->get_value();
       vector<Node> partial_output;
       partial_output.push_back(output);
@@ -99,31 +96,27 @@ class Parser {
     return output;
   }
 
-
-  static Node parse_fator(Tokenizer *tokens) {
+  static Node parse_fator(Tokenizer* tokens) {
     tokens->select_next();
     Node output;
 
-
-
-    if (tokens->get_type() == "DIGIT"){
+    if (tokens->get_type() == "DIGIT") {
       output = Num(tokens->get_value() - '0');
-      output.evaluate(&output);
-      #ifdef DEBUG
-      
-      #endif
-    } else if (tokens->get_type()=="UNOP"){
 
+#ifdef DEBUG
+      cout << output.evaluate(&output);
+#endif
+    } else if (tokens->get_type() == "UNOP") {
       int token = tokens->get_value();
       vector<Node> partial_output;
       partial_output.push_back(parse_fator(tokens));
       output = UnOp(token, partial_output);
 
-    } else if (tokens->get_type()=="BRCKT"){
+    } else if (tokens->get_type() == "BRCKT") {
       if (tokens->get_value() == '(') {
         output = parse_expression(tokens);
 
-        if (tokens->get_value() != ')'){
+        if (tokens->get_value() != ')') {
           throw UNEXPECTEDTOKEN;
         }
       }
@@ -131,7 +124,6 @@ class Parser {
     tokens->select_next();
     return output;
   }
-
 
   static Node run(string code) {
     Node parser = parse_expression(new Tokenizer(code));
@@ -141,23 +133,15 @@ class Parser {
 
 #ifndef _TESTS
 int main(int argc, char const* argv[]) {
-
-
-  
-
   Parser* parser = new Parser();
   string code = argv[1];
   Node teste = parser->run(code);
-  cout << teste.evaluate(&teste);
-  //reverse(code.begin(), code.end());
-  
-  /*
 
-  cout << 
-  #ifdef DEBUG
-   << "<-RESP" 
-  #endif 
-   << endl;*/
+  cout << teste.evaluate(&teste)
+#ifdef DEBUG
+       << "<-RESP"
+#endif
+       << endl;
   return 0;
 }
 #endif
