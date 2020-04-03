@@ -78,7 +78,7 @@ class Parser {
       vector<Node> partial_output;
       partial_output.push_back(output);
       partial_output.push_back(parse_term(tokens));
-      output = UnOp(token, partial_output);
+      output = BinOp(token, partial_output);
     }
     return output;
   }
@@ -111,7 +111,9 @@ class Parser {
       vector<Node> partial_output;
       partial_output.push_back(parse_fator(tokens));
       output = UnOp(token, partial_output);
-
+#ifdef DEBUG
+      cout << token << partial_output[0].evaluate(&partial_output[0]);
+#endif
     } else if (tokens->get_type() == "BRCKT") {
       if (tokens->get_value() == '(') {
         output = parse_expression(tokens);
