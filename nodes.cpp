@@ -51,7 +51,23 @@ int eval_unop(Node *node) {
   return -1;
 }
 
+int eval_var(Node *node) { return node->value; }
+
 int eval_num(Node *node) { return node->value; }
+
+int eval_equal(Node *node) {
+  // set token table = expression
+
+  return node->value;
+}
+
+int eval_echo(Node *node) {
+  // set token table = expression
+
+  std::cout << node->children[0].evaluate(&node->children[0]);
+
+  return 0;
+}
 
 class BinOp : public Node {
  public:
@@ -76,5 +92,36 @@ class Num : public Node {
   Num(int _value) {
     value = _value;
     evaluate = &eval_num;
+  }
+};
+
+class Var : public Node {
+ public:
+  Var(int _value) {
+    value = _value;
+    evaluate = &eval_var;
+  }
+};
+
+class NoOp : public Node {
+ public:
+  NoOp() {}
+};
+
+class Equal : public Node {
+ public:
+  Equal(int _value, std::vector<Node> _children) {
+    value = _value;
+    evaluate = &eval_equal;
+    children = _children;
+  }
+};
+
+class Echo : public Node {
+ public:
+  Echo(int _value, std::vector<Node> _children) {
+    value = _value;
+    evaluate = &eval_echo;
+    children = _children;
   }
 };

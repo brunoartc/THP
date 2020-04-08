@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <regex>
+#include <fstream>
 
 #include "nodes.cpp"
 using namespace std;
@@ -28,8 +29,17 @@ class Token {
       return "BIOP";
     else if (value == '(' | value == ')')
       return "BRCKT";
-    else if (value == ' ')
+    else if (value == ' ' | value == '\n')
       return "SPACE";
+    else if (value == '{' | value == '}')
+      return "BRCKTT";
+
+    else if (value == '$')  // fix
+      return "VAR";
+    else if (value == '=')  // fix
+      return "EQUALS";
+    else if (value == ';')  // fix
+      return "END";
     else
       throw UNKNOWNTOKEN;
     return "NULL";
@@ -96,7 +106,55 @@ class Parser {
     return output;
   }
 
-  static Node parse_fator(Tokenizer* tokens) {
+  static Node parse_block(Tokenizer* tokens) {
+    Node output;
+    if (tokens->get_type() == "BRCKTT") {
+      if (tokens->get_value() == '{') {
+        while (tokens->get_value() != '}') {
+          output = parse_command(tokens);
+        }
+      }
+    }
+  }
+
+  static Node parse_command(Tokenizer* tokens) {
+    Node output;
+
+    if (tokens->get_type() == "VAR") {
+      Node output1 = Var(tokens->get_value());
+      tokens->select_next();
+      if (tokens->get_type() == "EQUALS") {
+        vector<Node> partial_output;
+        partial_output.push_back(output1);
+        tokens->select_next();
+        partial_output.push_back(parse_expression(tokens));
+        output = Equal('=', partial_output);
+        tokens->select_next();
+        if (tokens->get_type() != "END") {
+          throw 666;
+        }
+      }
+    } else if (tokens->get_type() == "END") {
+      output = NoOp();
+    } else if (tokens->get_type() == "ECHO") {
+      tokens->select_next();
+      vector<Node> partial_output;
+      partial_output.push_back(parse_expression(tokens));
+      output = Echo(477, partial_output);
+      tokens->select_next();
+      if (tokens->get_type() != "END") {
+        throw 666;
+      }
+
+    } else {
+      tokens->select_next();
+      output = parse_block(tokens);
+    }
+
+    return output;
+  }
+
+  static Node parse_fator(Tokenizer* tokens) {  // mudar
     tokens->select_next();
     Node output;
 
@@ -122,6 +180,8 @@ class Parser {
           throw UNEXPECTEDTOKEN;
         }
       }
+    } else if (tokens->get_type() == "VAR") {
+      output = Var(tokens->get_value());
     }
     tokens->select_next();
     return output;
@@ -136,7 +196,20 @@ class Parser {
 #ifndef _TESTS
 int main(int argc, char const* argv[]) {
   Parser* parser = new Parser();
-  string code = argv[1];
+
+
+  std::ifstream ifs(argv[1]);
+  std::string content( (std::istreambuf_iterator<char>(ifs)),
+                       (std::istreambuf_iterator<char>()));
+
+
+
+
+  regex comment("/\\*.*?\\*/");
+  regex space(" ");
+
+  const string code = regex_replace(regex_replace(content, comment, ""), space, "");
+
   Node teste = parser->run(code);
 
   cout << teste.evaluate(&teste)
