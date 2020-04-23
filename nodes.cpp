@@ -40,10 +40,10 @@ int eval_biop(Node *node) {
 int eval_unop(Node *node) {
   switch (node->value) {
     case '-':
-      return -node->children[1].evaluate(&node->children[0]);
+      return -node->children[0].evaluate(&node->children[0]);
       break;
     case '+':
-      return +node->children[1].evaluate(&node->children[0]);
+      return +node->children[0].evaluate(&node->children[0]);
       break;
     default:
       break;
@@ -67,7 +67,7 @@ class UnOp : public Node {
   UnOp(int _value, std::vector<Node> _children) {
     value = _value;
     children = _children;
-    evaluate = &eval_biop;
+    evaluate = &eval_unop;
   }
 };
 

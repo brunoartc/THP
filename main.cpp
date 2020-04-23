@@ -13,7 +13,7 @@ using namespace std;
 class Token {
  public:
   string type;
-  int value;
+  string value;
   Token(int _value) {
     value = _value;
     type = extract_type(_value);
@@ -54,8 +54,16 @@ class Tokenizer {
         actual->type = "EOL";
       } else {
         actual->value = origin.at(position);
-        actual->type = actual->extract_type(actual->value);
+        actual->type = actual->extract_type(actual->value.at(0));
       }
+
+      while (position+1 < origin.length() && actual->type == "DIGIT"){
+        cout << actual->extract_type(origin.at(position+1));
+        position++;
+      }
+
+
+      
 
       position++;
 
@@ -64,7 +72,7 @@ class Tokenizer {
     }
   }
   string get_type() { return actual->type; }
-  int get_value() { return actual->value; }
+  int get_value() { return actual->value.at(0); }
 };
 
 class Parser {
