@@ -57,10 +57,7 @@ class Tokenizer {
         actual->type = actual->extract_type(actual->value.at(0));
       }
 
-      while (position+1 < origin.length() && actual->type == "DIGIT"){
-        cout << actual->extract_type(origin.at(position+1));
-        position++;
-      }
+
 
 
       
@@ -86,7 +83,7 @@ class Parser {
       vector<Node> partial_output;
       partial_output.push_back(output);
       partial_output.push_back(parse_term(tokens));
-      output = UnOp(token, partial_output);
+      output = BinOp(token, partial_output);
     }
     return output;
   }
