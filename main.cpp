@@ -10,6 +10,8 @@ using namespace std;
 #define UNKNOWNTOKEN 1;
 #define UNEXPECTEDTOKEN 2;
 
+#define DEBUG
+
 class Token
 {
 public:
@@ -25,7 +27,6 @@ public:
     if (isdigit(value))
       return "DIGIT";
     else if (value == '-' | value == '+')
-
       return "UNOP";
     else if (value == '/' | value == '*')
       return "BIOP";
@@ -62,6 +63,7 @@ public:
 
   void select_next()
   {
+    cout << position << "              <-POSITION" << endl;
     if (position < origin.length())
     {
       if (position == origin.length())
@@ -91,7 +93,7 @@ public:
     else
     {
       #ifdef DEBUG
-      cout << actual->value << "->" << actual->type << endl;
+      cout << actual->value << "!>" << actual->type << endl;
       #endif
       // EOF or SPACE
     }
@@ -157,10 +159,6 @@ public:
     if (tokens->get_type() == "DIGIT")
     {
       output = Num(tokens->get_value());
-
-#ifdef DEBUG
-      cout << output.evaluate(&output);
-#endif
     }
     else if (tokens->get_type() == "UNOP")
     {
@@ -197,8 +195,8 @@ int main(int argc, char const *argv[])
 {
   Parser *parser = new Parser();
   string code = argv[1];
+  
   Node teste = parser->run(code);
-
   cout << teste.evaluate(&teste)
 #ifdef DEBUG
        << "<-RESP"
