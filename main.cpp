@@ -33,6 +33,14 @@ public:
       return "BRCKT";
     else if (value == ' ')
       return "SPACE";
+    else if (value == '$' | isalpha(value))
+      return "VAR";
+    else if (value == '{' | value == '}')
+      return "CBRCKT";
+    else if (value == '=') 
+      return "EQUALS";
+    else if (value == ';') 
+      return "END";
     else
       throw UNKNOWNTOKEN;
     return "NULL";
@@ -71,8 +79,11 @@ public:
       {
         position++;
         actual->value += origin.at(position);
+        
       }
+      cout << actual->value << "-->" << actual->type << endl;
 
+      
       position++;
     }
     else
