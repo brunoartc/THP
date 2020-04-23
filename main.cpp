@@ -37,12 +37,12 @@ public:
       return "VAR";
     else if (value == '{' | value == '}')
       return "CBRCKT";
-    else if (value == '=') 
+    else if (value == '=')
       return "EQUALS";
-    else if (value == ';') 
+    else if (value == ';')
       return "END";
     else
-      throw UNKNOWNTOKEN;
+      cout << (char) value;
     return "NULL";
   }
   string get_type() { return type; }
@@ -68,51 +68,50 @@ public:
       {
         actual->value = -1;
         actual->type = "EOL";
+
       }
       else
       {
         actual->value = origin.at(position);
         actual->type = actual->extract_type(actual->value.at(0));
+
       }
 
-      while (position + 1 < origin.length() && actual->type == actual->extract_type(origin.at(position + 1)))
+      while ((actual->type == "DIGIT" | actual->type == "VAR") && position + 1 < origin.length() && actual->type == actual->extract_type(origin.at(position + 1)))
       {
         position++;
         actual->value += origin.at(position);
-        
-      }
-      cout << actual->value << "-->" << actual->type << endl;
 
-      
+      }
+      #ifdef DEBUG
+      cout << actual->value << "->" << actual->type << endl;
+      #endif
       position++;
     }
     else
     {
+      #ifdef DEBUG
+      cout << actual->value << "->" << actual->type << endl;
+      #endif
       // EOF or SPACE
     }
   }
   string get_type() { return actual->type; }
   int get_value()
   {
-    if (actual->value.size() > 1)
+    if (actual->type == "DIGIT")
     {
-      if (actual->type == "DIGIT")
-      {
 
-        return stoi(actual->value);
-      }
-    } else {
-      if (actual->type == "DIGIT")
-      {
-
-        return stoi(actual->value);
-      } else {
-        return actual->value.at(0);
-      }
-      
+      return stoi(actual->value);
     }
-
-    
+    else if (actual->value.size() > 1)
+    {
+      return -1;
+    }
+    else
+    {
+      return actual->value.at(0);
+    }
   }
 };
 
