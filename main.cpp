@@ -10,7 +10,6 @@ using namespace std;
 #define UNKNOWNTOKEN 1;
 #define UNEXPECTEDTOKEN 2;
 
-#define DEBUG
 
 class Token
 {
@@ -34,7 +33,7 @@ public:
       return "BRCKT";
     else if (value == ' ')
       return "SPACE";
-    else if (value == '$' | isalpha(value))
+    else if (value == '$')
       return "VAR";
     else if (value == '{' | value == '}')
       return "CBRCKT";
@@ -42,6 +41,8 @@ public:
       return "EQUALS";
     else if (value == ';')
       return "END";
+    else if (isalpha(value))
+      return "ALPHA";
     else
       cout << (char) value;
     return "NULL";
@@ -63,7 +64,9 @@ public:
 
   void select_next()
   {
+    #ifdef DEBUG
     cout << position << "              <-POSITION" << endl;
+    #endif
     if (position < origin.length())
     {
       if (position == origin.length())
@@ -79,7 +82,7 @@ public:
 
       }
 
-      while ((actual->type == "DIGIT" | actual->type == "VAR") && position + 1 < origin.length() && actual->type == actual->extract_type(origin.at(position + 1)))
+      while ( position + 1 < origin.length() && ((actual->type == "DIGIT" && actual->extract_type(origin.at(position + 1)) == "DIGIT")  | (actual->type == "VAR" && actual->extract_type(origin.at(position + 1)) == "ALPHA")  | (actual->type == "ALPHA" && actual->extract_type(origin.at(position + 1)) == "ALPHA")))
       {
         position++;
         actual->value += origin.at(position);
@@ -114,6 +117,9 @@ public:
     {
       return actual->value.at(0);
     }
+  }
+  string get_full_value(){
+    return actual->value;
   }
 };
 
@@ -178,9 +184,67 @@ public:
           throw UNEXPECTEDTOKEN;
         }
       }
+    } else if (tokens->get_type() == "VAR"){
+
     }
     tokens->select_next();
     return output;
+  }
+
+  static Node parse_command(Tokenizer *tokens)
+  {
+    tokens->select_next();
+    Node output;
+
+    if (tokens->get_type() == "END"){
+      output = NoOp();
+    } else if(tokens->get_type() == "VAR") {
+
+      string var_value = tokens->get_full_value();
+      tokens->select_next();
+
+
+      if (tokens->get_type() == "EQUALS") {
+        tokens->select_next();
+        
+        vector<Node> partial_output;
+        partial_output.push_back(Var(var_value));
+        partial_output.push_back(parse_expression(tokens));
+        string token_value = tokens->get_full_value();
+        
+        output = Equal(token_value, partial_output);
+        tokens->select_next();
+
+        if(tokens->get_type() == "END") {
+          return output;
+        } else {
+          throw UNKNOWNTOKEN;
+        }
+
+      } else {
+        throw UNKNOWNTOKEN;
+      }
+
+    } else if (tokens->get_type() == "ALPHA") {
+
+      if (tokens->get_full_value() == "ECHO") {
+        tokens->select_next();
+        vector<Node> partial_output;
+        partial_output.push_back(parse_expression(tokens));
+        output = Echo(partial_output);
+        tokens->select_next(); // o proximo chamado nao pode dar select next
+
+        if(tokens->get_type() == "END") {
+          return output;
+        } else {
+          throw UNKNOWNTOKEN;
+        }
+
+      }
+      //comando
+    } else {
+      //TODO: parse_block
+    }
   }
 
   static Node run(string code)
@@ -196,7 +260,6 @@ string pre_processing(string code) {
     regex space(" ");
 
     const string s1 = regex_replace(code,comment, "");
-    cout << s1;
     return s1;
 }
 

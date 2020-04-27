@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 class Node {
  public:
@@ -97,8 +98,8 @@ class Num : public Node {
 
 class Var : public Node {
  public:
-  Var(int _value) {
-    value = _value;
+  Var(std::string _value) {
+    std::string full_value = _value;
     evaluate = &eval_var;
   }
 };
@@ -110,8 +111,8 @@ class NoOp : public Node {
 
 class Equal : public Node {
  public:
-  Equal(int _value, std::vector<Node> _children) {
-    value = _value;
+  Equal(std::string _value, std::vector<Node> _children) {
+    std::string full_value = _value;
     evaluate = &eval_equal;
     children = _children;
   }
@@ -119,8 +120,7 @@ class Equal : public Node {
 
 class Echo : public Node {
  public:
-  Echo(int _value, std::vector<Node> _children) {
-    value = _value;
+  Echo(std::vector<Node> _children) {
     evaluate = &eval_echo;
     children = _children;
   }
