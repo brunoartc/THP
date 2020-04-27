@@ -190,13 +190,23 @@ public:
   }
 };
 
+
+string pre_processing(string code) {
+  regex comment("/\\*.*?\\*/");
+    regex space(" ");
+
+    const string s1 = regex_replace(code,comment, "");
+    cout << s1;
+    return s1;
+}
+
 #ifndef _TESTS
 int main(int argc, char const *argv[])
 {
   Parser *parser = new Parser();
   string code = argv[1];
-  
-  Node teste = parser->run(code);
+  string pre_processed = pre_processing(code);
+  Node teste = parser->run(pre_processed);
   cout << teste.evaluate(&teste)
 #ifdef DEBUG
        << "<-RESP"
