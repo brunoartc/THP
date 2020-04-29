@@ -63,12 +63,43 @@ int eval_equal(Node *node) {
 }
 
 int eval_echo(Node *node) {
-  // set token table = expression
-
-  std::cout << node->children[0].evaluate(&node->children[0]);
+    std::cout << node->children[0].evaluate(&node->children[0]);
 
   return 0;
 }
+
+
+int eval_block(Node *node) {
+  for(Node i : node->children){
+    i.evaluate(&i);
+  }
+  
+  return 0;
+}
+
+
+
+int eval_if(Node *node) {
+  if (node->children[0].evaluate(&node->children[0])) {
+    node->children[1].evaluate(&node->children[1]);
+  } else {
+    if (node->children.size()>1){
+      node->children[2].evaluate(&node->children[2]);
+    }
+  }
+  
+  return 0;
+}
+
+int eval_while(Node *node) {
+  while (node->children[0].evaluate(&node->children[0])) {
+    node->children[1].evaluate(&node->children[1]);
+  }
+  
+  return 0;
+}
+
+
 
 class BinOp : public Node {
  public:
@@ -122,6 +153,30 @@ class Echo : public Node {
  public:
   Echo(std::vector<Node> _children) {
     evaluate = &eval_echo;
+    children = _children;
+  }
+};
+
+class Block : public Node {
+ public:
+  Block(std::vector<Node> _children) {
+    evaluate = &eval_block;
+    children = _children;
+  }
+};
+
+class IfNode : public Node {
+ public:
+  IfNode(std::vector<Node> _children) {
+    evaluate = &eval_if;
+    children = _children;
+  }
+};
+
+class WhileNode : public Node {
+ public:
+  WhileNode(std::vector<Node> _children) {
+    evaluate = &eval_while;
     children = _children;
   }
 };

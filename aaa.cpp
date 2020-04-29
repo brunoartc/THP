@@ -27,7 +27,7 @@ public:
   {
     if (isdigit(value))
       return "DIGIT";
-    else if (value == '-' | value == '+' | value == '>' | value == '<')
+    else if (value == '-' | value == '+')
       return "UNOP";
     else if (value == '/' | value == '*')
       return "BIOP";
@@ -84,7 +84,7 @@ public:
 
       }
 
-      while ( position + 1 < origin.length() && ((actual->type == "DIGIT" && actual->extract_type(origin.at(position + 1)) == "DIGIT")  | (actual->type == "VAR" && actual->extract_type(origin.at(position + 1)) == "ALPHA")  | (actual->type == "ALPHA" && actual->extract_type(origin.at(position + 1)) == "ALPHA")) | (actual->type == "EQUAL" && actual->extract_type(origin.at(position + 1)) == "EQUAL") )
+      while ( position + 1 < origin.length() && ((actual->type == "DIGIT" && actual->extract_type(origin.at(position + 1)) == "DIGIT")  | (actual->type == "VAR" && actual->extract_type(origin.at(position + 1)) == "ALPHA")  | (actual->type == "ALPHA" && actual->extract_type(origin.at(position + 1)) == "ALPHA")))
       {
         position++;
         actual->value += origin.at(position);
@@ -152,28 +152,35 @@ public:
   }
 
 
-  static Node parse_rel_expression(Tokenizer *tokens) // OKAY
+  static Node parse_command2(Tokenizer *tokens)
   {
-    Node output = parse_expression(tokens);
-
-    while (tokens->get_type() == "UNOP" | tokens->get_full_value() == "==")
+    Node output = parse_term(tokens);
+    vector<Node> blocks;
+    while (tokens->get_type() == "CBRCKT")
     {
-      int token = tokens->get_value();
-      vector<Node> partial_output;
-      partial_output.push_back(output);
-      partial_output.push_back(parse_expression(tokens));
-      output = BinOp(token, partial_output);
+      if (tokens->get_value() == '{'){
+        //blocks.push_back(parse_command()) TODO !!!
+        tokens->select_next();
+        if (tokens->get_value() == '}'){
+          tokens->select_next();
+        } else {
+        throw UNEXPECTEDTOKEN;
+        }
+      } else {
+        throw UNEXPECTEDTOKEN;
+      }
     }
+    output = Block(blocks);
     return output;
   }
 
 
 
-  static Node parse_expression(Tokenizer *tokens) // OKAY
+  static Node parse_expression(Tokenizer *tokens)
   {
     Node output = parse_term(tokens);
 
-    while (tokens->get_type() == "UNOP" | tokens->get_full_value() == "OR")
+    while (tokens->get_type() == "UNOP")
     {
       int token = tokens->get_value();
       vector<Node> partial_output;
@@ -184,11 +191,11 @@ public:
     return output;
   }
 
-  static Node parse_term(Tokenizer *tokens) // OKAY
+  static Node parse_term(Tokenizer *tokens)
   {
     Node output = parse_fator(tokens);
 
-    while (tokens->get_type() == "BIOP" | tokens->get_full_value() == "AND")
+    while (tokens->get_type() == "BIOP")
     {
       int token = tokens->get_value();
       vector<Node> partial_output;
@@ -208,7 +215,7 @@ public:
     {
       output = Num(tokens->get_value());
     }
-    else if (tokens->get_type() == "UNOP" | tokens->get_value() == '!')
+    else if (tokens->get_type() == "UNOP")
     {
       int token = tokens->get_value();
       vector<Node> partial_output;
@@ -219,7 +226,7 @@ public:
     {
       if (tokens->get_value() == '(')
       {
-        output = parse_rel_expression(tokens); //TODO CHANGE REAL EXPRESSION
+        output = parse_expression(tokens);
 
         if (tokens->get_value() != ')')
         {
@@ -227,18 +234,6 @@ public:
         }
       }
     } else if (tokens->get_type() == "VAR"){
-      output = Var(tokens->get_full_value());
-    } else if (tokens->get_full_value() == "READLINE") {
-      tokens->select_next();
-      if (tokens->get_value() == '('){
-          tokens->select_next();
-          if ((tokens->get_value() == ')')) {
-          } else {
-            throw UNEXPECTEDTOKEN;
-          }
-        } else {
-          throw UNEXPECTEDTOKEN;
-        }
 
     }
     tokens->select_next();
@@ -263,7 +258,7 @@ public:
         
         vector<Node> partial_output;
         partial_output.push_back(var_node);
-        partial_output.push_back(parse_rel_expression(tokens));
+        partial_output.push_back(parse_expression(tokens));
         string token_value = tokens->get_full_value();
         
         tokens->select_next();
@@ -279,10 +274,11 @@ public:
       }
 
     } else if (tokens->get_type() == "ALPHA") {
+
       if (tokens->get_full_value() == "ECHO") {
         tokens->select_next();
         vector<Node> partial_output;
-        partial_output.push_back(parse_rel_expression(tokens));
+        partial_output.push_back(parse_expression(tokens));
         output = Echo(partial_output);
         tokens->select_next(); // o proximo chamado nao pode dar select next
 
@@ -296,23 +292,13 @@ public:
         tokens->select_next();
         if (tokens->get_value() == '('){
           tokens->select_next();
-          Node real_exp = parse_rel_expression(tokens);// TESTE
+          //Node real_exp = parse_rel_expre() TODO
           tokens->select_next();
-          if ((tokens->get_value() == ')')) {
+          if ((tokens->get_value() == '(')) {
             tokens->select_next();
-            Node command = parse_command(tokens);// TESTE
+            //Node command = parse_command() TODO
             tokens->select_next();
-
-            if(tokens->get_type() == "END") {
-              vector<Node> partial_output;
-              partial_output.push_back(real_exp);
-              partial_output.push_back(command);
-              return WhileNode(partial_output); //TEST
-              //return output;
-            } else {
-              throw UNKNOWNTOKEN;
-            }
-            
+            //return While(partial_output) TODO
           } else {
             throw UNEXPECTEDTOKEN;
           }
@@ -325,9 +311,9 @@ public:
         tokens->select_next();
         if (tokens->get_value() == '('){
           tokens->select_next();
-          partial_output.push_back(parse_rel_expression(tokens));// TODO
+          //Node real_exp = parse_rel_expre() TODO
           tokens->select_next();
-          if ((tokens->get_value() == ')')) {
+          if ((tokens->get_value() == '(')) {
             tokens->select_next();
             partial_output.push_back(parse_command(tokens));// TODO
             tokens->select_next();
@@ -336,12 +322,7 @@ public:
               partial_output.push_back(parse_command(tokens));
               tokens->select_next();
             }
-            if(tokens->get_type() == "END") {
-              return IfNode(partial_output); //TODO
-              //return output;
-            } else {
-              throw UNKNOWNTOKEN;
-            }
+            //return If(partial_output) TODO
           } else {
             throw UNEXPECTEDTOKEN;
           }
@@ -359,7 +340,7 @@ public:
 
   static Node run(string code)
   {
-    Node parser = parse_rel_expression(new Tokenizer(code));
+    Node parser = parse_expression(new Tokenizer(code));
     return parser;
   }
 };
