@@ -328,3 +328,5 @@ class Parser:
             raise EnvironmentError("missing EOF")
 
         res.evaluate(st)
+
+        print("\n".join(asm) + "POP EBP\nMOV EAX, 1\nINT 0x80\n")
