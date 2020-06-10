@@ -20,7 +20,7 @@ class BinOp(Node):
 
         
 
-        if child_type[0] == "INT" and child_type[1] == "INT":
+        if child_type[0] == "INT" or child_type[1] == "INT" or child_type[0] == "BOOL" or child_type[1] == "BOOL":
             if self.value == "-":
                 return (child_value[0] - child_value[1], "INT")
             elif self.value == "+":
@@ -39,8 +39,10 @@ class BinOp(Node):
                 return (child_value[0] or child_value[1], "BOOL")
             elif self.value == "AND":
                 return (child_value[0] and child_value[1], "BOOL")
+            elif self.value == "==":
+                return (child_value[0] == child_value[1], "BOOL")
         else:
-            raise EnvironmentError("")
+            raise EnvironmentError(child_type[0])
 
 class UnOp(Node):
     def __init__(self, value, children):
@@ -51,11 +53,11 @@ class UnOp(Node):
         child_value, child_type = self.children[0].evaluate(st)
 
         if child_type == "INT" and self.value == "-":
-            return - child_value
+            return - child_value, child_type
         elif child_type == "INT" and self.value == "+":
-            return child_value
-        elif child_type == "BOOL" and self.value == "NOT":
-            return not child_value
+            return child_value, child_type
+        elif child_type == "BOOL" and self.value == "!":
+            return not child_value, child_type
         else:
             raise EnvironmentError("")
 
@@ -128,6 +130,7 @@ class If(Node):
         self.children = children
 
     def evaluate(self, st):
+        #print(self.children[0].evaluate(st))
         relexp_value, relexp_type = self.children[0].evaluate(st)
 
         if relexp_type == "BOOL" or relexp_type == "INT":

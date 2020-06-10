@@ -181,7 +181,8 @@ class Parser:
                     if Parser.tokens.actual.type == "ELSE":
                         Parser.tokens.selectNext()
                         command_else = Parser.parseCommand()
-
+                    else:
+                        command_else = NoOp()
                     
                     return If("IF", [rel_exp, command_if, command_else])
 
@@ -281,16 +282,17 @@ class Parser:
         elif Parser.tokens.actual.type == "BRACKETS":
             if Parser.tokens.actual.value == "(":
                 Parser.tokens.selectNext()
-                output = Parser.parseExpression()
+                output = Parser.parseRelExpression()
 
                 if Parser.tokens.actual.value == ")":
                     Parser.tokens.selectNext()
                 else:
-                    raise EnvironmentError()
+                    
+                    raise EnvironmentError(Parser.tokens.actual.value)
             else:
                 raise EnvironmentError()
 
-        elif Parser.tokens.actual.value in ["+", "-", "NOT"]:
+        elif Parser.tokens.actual.value in ["+", "-", "!"]:
             if Parser.tokens.actual.value == "+":
                 Parser.tokens.selectNext()
                 output = UnOp("+", [Parser.parseFactor()])
@@ -299,9 +301,9 @@ class Parser:
                 Parser.tokens.selectNext()
                 output = UnOp("-", [Parser.parseFactor()])
 
-            elif Parser.tokens.actual.value == "NOT":
+            elif Parser.tokens.actual.value == "!":
                 Parser.tokens.selectNext()
-                output = UnOp("NOT", [Parser.parseFactor()])
+                output = UnOp("!", [Parser.parseFactor()])
 
         elif Parser.tokens.actual.value in ["TRUE", "FALSE"]:
             output = BoolValue(Parser.tokens.actual.value)
