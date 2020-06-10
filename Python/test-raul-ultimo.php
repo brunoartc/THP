@@ -8,6 +8,7 @@
         $a = $x + $y;
         echoes($a);
         return $a;
+        echo(22);
     }
 
     $a = 3;
