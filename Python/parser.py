@@ -4,36 +4,55 @@ from lexer import Tokenizer
 import re
 
 def pre(code):
-        filter_comments = re.sub("'.*\n", "\n", code)
-        return re.sub("^(\s*(\r\n|\n|\r))", '', filter_comments) 
+        filtered = re.sub("\n", "", code)
+        return re.sub(r"(\/\*(.*?)\*\/)", '', filtered) 
 
 class Parser:
+
     @staticmethod
-    def parseBlock():
-        statements = []
+    def parseProgram():
+        commands = []
+
+
+        #print(Parser.tokens.actual.value)
+        if Parser.tokens.actual.value == "<?php":
+            Parser.tokens.selectNext()
+            while Parser.tokens.actual.value != "?>":
+                #print(Parser.tokens.actual.value)
+                commands.append(Parser.parseCommand())
+                
+        else:
+            raise EnvironmentError()
+        Parser.tokens.selectNext()
+        return Program('prg', commands)
+
+
+    @staticmethod
+    def parseBlock(name='prg'):
+        commands = []
 
 
 
         if Parser.tokens.actual.value == "{":
             Parser.tokens.selectNext()
             while Parser.tokens.actual.value != "}":
-                statements.append(Parser.parseCommand())
+                commands.append(Parser.parseCommand())
                 
         else:
             raise EnvironmentError()
         Parser.tokens.selectNext()
-        return Program('prg', statements)
+        return Program(name, commands)
 
         
 
     @staticmethod
-    def parseCommand():
+    def parseCommand(name='prg'):
 
         #print("COMMAND" + Parser.tokens.actual.value)
         if Parser.tokens.actual.type == "VAR":
             VAR = Indentifier(Parser.tokens.actual.value)
+            identi = Parser.tokens.actual.value
             Parser.tokens.selectNext()
-
 
             if Parser.tokens.actual.type == "EQUAL":
                 Parser.tokens.selectNext()
@@ -45,14 +64,79 @@ class Parser:
                     return output
                 else:
                   raise EnvironmentError()
-     
+            elif Parser.tokens.actual.value == "(":
+                Parser.tokens.selectNext()
+                args = []
+                while Parser.tokens.actual.value != ")":
+                    if Parser.tokens.actual.type == "VAR":
+                        #print(Parser.tokens.actual.value)
+                        args.append(Indentifier(Parser.tokens.actual.value))
+                        Parser.tokens.selectNext()
+                        if Parser.tokens.actual.value == ",":
+                            Parser.tokens.selectNext()
+                    elif Parser.tokens.actual.type == "INT":
+                        #print(Parser.tokens.actual.value)
+                        args.append(IntVal(Parser.tokens.actual.value))
+                        Parser.tokens.selectNext()
+                        if Parser.tokens.actual.value == ",":
+                            Parser.tokens.selectNext()
+                    else:
+                        #print(Parser.tokens.actual.type)
+                        raise EnvironmentError()
+                Parser.tokens.selectNext()
+                #Parser.tokens.selectNext() #CHECK O PUNTU E VIRGULU
+                #print("ARGGGG=", args)
+                output = FuncCall(identi, args)
+                #print("VITORIA=", output)
+                return output
+                #raise EnvironmentError() MOTIVATION OF TESTS ONLY
+            else:
+                #print(Parser.tokens.actual.value)
+                raise EnvironmentError()
+        elif Parser.tokens.actual.type == "FUNCTION":
+            Parser.tokens.selectNext()
+            if Parser.tokens.actual.type == "VAR":
+                args = []
+                func_name = Parser.tokens.actual.value
+                Parser.tokens.selectNext()
+                if Parser.tokens.actual.value == "(":
+                    Parser.tokens.selectNext()
+                    while Parser.tokens.actual.value != ")":
+                        if Parser.tokens.actual.type == "VAR":
+                            args.append(Indentifier(Parser.tokens.actual.value))
+                            Parser.tokens.selectNext()
+                            if Parser.tokens.actual.value == ",":
+                                Parser.tokens.selectNext()
+                        else:
+                            raise EnvironmentError()
+                    Parser.tokens.selectNext()
+                    command_func = Parser.parseCommand(name="FUN :(")
+                    args.append(command_func)
+
+                    output = FuncDec(func_name, args)
+                    #print(output.children)
+                    return output
+                else:
+                    raise EnvironmentError()
             else:
                 raise EnvironmentError()
-   
+
         elif Parser.tokens.actual.type == "ECHO":
             Parser.tokens.selectNext()
             
             output = Print('ECHO', [Parser.parseRelExpression()])
+            if (Parser.tokens.actual.type == "COMMANDEND"):
+                Parser.tokens.selectNext()
+                #print("RETORNANDO ECHO" + Parser.tokens.actual.value)
+                return output
+            else:
+                #print(Parser.tokens.actual.type)
+                raise EnvironmentError()
+
+        elif Parser.tokens.actual.type == "RETURN":
+            Parser.tokens.selectNext()
+            
+            output = Return('ECHO', [Parser.parseRelExpression()])
             if (Parser.tokens.actual.type == "COMMANDEND"):
                 Parser.tokens.selectNext()
                 #print("RETORNANDO ECHO" + Parser.tokens.actual.value)
@@ -102,15 +186,17 @@ class Parser:
                     return If("IF", [rel_exp, command_if, command_else])
 
                 else:
+                    #print(Parser.tokens.actual.type)
                     raise EnvironmentError()
             else:
                raise EnvironmentError() 
         elif (Parser.tokens.actual.type == "COMMANDEND" or Parser.tokens.actual.value == "}"):
             #print("SAIU UM NOOP" + Parser.tokens.actual.value)
+            Parser.tokens.selectNext()
             return NoOp()
         else:
             #print("VAI ENTRAR BLOCk" + Parser.tokens.actual.value)
-            return Parser.parseBlock()
+            return Parser.parseBlock(name=name)
 
     @staticmethod
     def parseExpression():
@@ -157,8 +243,36 @@ class Parser:
             Parser.tokens.selectNext()
 
         elif Parser.tokens.actual.type == "VAR":
+            identi = Parser.tokens.actual.value
             output = Indentifier(Parser.tokens.actual.value)
             Parser.tokens.selectNext()
+            if Parser.tokens.actual.value == "(":
+                Parser.tokens.selectNext()
+                args = []
+                while Parser.tokens.actual.value != ")":
+                    if Parser.tokens.actual.type == "VAR":
+                        #print(Parser.tokens.actual.value)
+                        args.append(Indentifier(Parser.tokens.actual.value))
+                        Parser.tokens.selectNext()
+                        if Parser.tokens.actual.value == ",":
+                            Parser.tokens.selectNext()
+                    elif Parser.tokens.actual.type == "INT":
+                        #print(Parser.tokens.actual.value)
+                        args.append(IntVal(Parser.tokens.actual.value))
+                        Parser.tokens.selectNext()
+                        if Parser.tokens.actual.value == ",":
+                            Parser.tokens.selectNext()
+                    else:
+                        #print(Parser.tokens.actual.type)
+                        raise EnvironmentError()
+                Parser.tokens.selectNext()
+                #Parser.tokens.selectNext() #CHECK O PUNTU E VIRGULU
+                #print("ARGGGG=", args)
+                output = FuncCall(identi, args)
+                #print("VITORIA=", output)
+                
+                #raise EnvironmentError() MOTIVATION OF TESTS ONLY
+
 
         elif Parser.tokens.actual.type == "READLINE":
             output = Input("READLINE")
@@ -201,8 +315,8 @@ class Parser:
     def parseRelExpression():
         output = Parser.parseExpression()
 
-        while Parser.tokens.actual.value in ["=", ">", "<"]:
-            if Parser.tokens.actual.value == "=":
+        while Parser.tokens.actual.value in ["==", ">", "<"]:
+            if Parser.tokens.actual.value == "==":
                 Parser.tokens.selectNext()
                 output = BinOp("=", [output, Parser.parseExpression()])
 
@@ -220,7 +334,7 @@ class Parser:
         st = SymbolTable()
         Parser.tokens = Tokenizer(pre(code))
         Parser.tokens.selectNext()
-        res = Parser.parseBlock()
+        res = Parser.parseProgram()
 
         Parser.tokens.selectNext()
         if Parser.tokens.actual.value != "EOF":

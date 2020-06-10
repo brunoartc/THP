@@ -37,7 +37,7 @@ class Tokenizer:
             self.actual = Token("CMPBINOP", ">")
             self.position += 1
 
-        elif self.code[self.position] == "<":
+        elif self.code[self.position] == "<" and self.code[self.position+1] != "?":
             self.actual = Token("CMPBINOP", "<")
             self.position += 1
 
@@ -69,6 +69,10 @@ class Tokenizer:
             self.actual = Token("LINEFEED", "\n")
             self.position += 1
 
+        elif self.code[self.position] == ",":
+            self.actual = Token("VIRGULOKO", ",")
+            self.position += 1
+
         elif self.code[self.position] == ";":
             self.actual = Token("COMMANDEND", ";")
             self.position += 1
@@ -80,13 +84,25 @@ class Tokenizer:
                 self.position += 1
             self.actual = Token("INT", int(int_token))
 
+        elif self.code[self.position] == "<" or self.code[self.position] == "?":
+            php_tags = ""
+            while self.position < len(self.code) and (self.code[self.position].isalnum() or self.code[self.position] == "$" or self.code[self.position] == "?" or self.code[self.position] == "<" or self.code[self.position] == ">"):
+                php_tags += str(self.code[self.position])
+                self.position += 1
+            reserved_words = ["<?php", "?>"]
+            if php_tags in reserved_words:
+                self.actual = Token(php_tags, php_tags)
+            else:
+                #print(php_tags)
+                raise EnvironmentError()
+
         elif self.code[self.position].isalpha() or self.code[self.position] == "$":
             VAR_token = ""
-            while self.position < len(self.code) and (self.code[self.position].isalnum() or self.code[self.position] == "_" or self.code[self.position] == "$"):
+            while self.position < len(self.code) and (self.code[self.position].isalnum() or self.code[self.position] == "$"):
                 VAR_token += str(self.code[self.position]).upper()
                 self.position += 1
 
-            reserved_words = ["ECHO", "WHILE", "IF", "ELSE", "READLINE", "TRUE", "FALSE", "AND", "OR", "NOT"]
+            reserved_words = ["ECHO", "WHILE", "IF", "ELSE", "READLINE", "TRUE", "FALSE", "AND", "OR", "NOT", "FUNCTION", "RETURN"]
             if VAR_token in reserved_words:
                 self.actual = Token(VAR_token, VAR_token)
             else:

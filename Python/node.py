@@ -1,3 +1,5 @@
+from symbol_table import SymbolTable
+
 class Node():
     def __init__(self):
         self.value = None
@@ -78,6 +80,7 @@ class Assigment(Node):
         self.children = children
 
     def evaluate(self, st):
+        #print(st.name, self.children[1].evaluate(st))
         st.setter(self.children[0].value, self.children[1].evaluate(st)[0])
 
 class Program(Node):
@@ -86,8 +89,14 @@ class Program(Node):
         self.children = children
 
     def evaluate(self, st):
+        #print(self.value)
         for child in self.children:
             child.evaluate(st)
+            if child == None: #disjuntor de 20 no lugar de 1 de 10 !!!!!!!!DONT DO DIS
+                pass
+            else:
+                pass
+                
 
 class Print(Node):
     def __init__(self, value, children):
@@ -95,7 +104,7 @@ class Print(Node):
         self.children = children
 
     def evaluate(self, st):
-        print(self.children[0].evaluate(st))
+        print(self.children[0].evaluate(st)[0])
 
 class While(Node):
     
@@ -169,3 +178,46 @@ class NoOp(Node):
 
     def evaluate(self, st):
         pass
+
+class FuncDec(Node):
+    def __init__(self, value, children):
+        self.value = value
+        self.children = children
+    def evaluate(self, st):
+        SymbolTable.set_new(self.value, [self, (None, None)])
+        #print(SymbolTable.table)
+class FuncCall(Node):
+    def __init__(self, value, children):
+        self.value = value
+        self.children = children
+    def evaluate(self, st):
+        new_st = SymbolTable(self.value)
+        beingcalled = SymbolTable.table[self.value][0]
+        calling = self.children
+
+        #print(11111111111,beingcalled)
+
+        beingcalled_vars = beingcalled.children[0:-1]
+        #print(beingcalled.children)
+        
+
+        if len(beingcalled_vars) == len(calling):
+            for i in range(len(calling)):
+                value = calling[i].evaluate(st)[0]
+                #print("IAHUUUUU", value)
+                new_st.setter(beingcalled_vars[i].value, value)
+                #print(new_st.getter(beingcalled_vars[i].value))
+        else:
+            raise EnvironmentError() #wrong number of args
+
+        beingcalled.children[-1].evaluate(new_st)
+        #print (41241414142,SymbolTable.table[new_st.name][1][0])
+        return SymbolTable.table[new_st.name][1]
+
+class Return(Node):
+    def __init__(self, value, children):
+        self.value = value
+        self.children = children
+
+    def evaluate(self, st):
+        SymbolTable.table[st.name][1] = (self.children[0].evaluate(st)[0], 'INT')
