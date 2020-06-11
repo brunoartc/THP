@@ -278,6 +278,15 @@ class Parser:
         elif Parser.tokens.actual.type == "READLINE":
             output = Input("READLINE")
             Parser.tokens.selectNext()
+            if Parser.tokens.actual.value == "(":
+                Parser.tokens.selectNext()
+                if Parser.tokens.actual.value == ")":
+                    Parser.tokens.selectNext()
+                else:
+                    raise EnvironmentError(Parser.tokens.actual.value)
+            else:
+                raise EnvironmentError()
+            #print(Parser.tokens.actual.type)
 
         elif Parser.tokens.actual.type == "BRACKETS":
             if Parser.tokens.actual.value == "(":
