@@ -39,7 +39,7 @@ class Parser:
                 commands.append(Parser.parseCommand())
                 
         else:
-            raise EnvironmentError()
+            raise EnvironmentError(Parser.tokens.actual.value)
         Parser.tokens.selectNext()
         return Program(name, commands)
 

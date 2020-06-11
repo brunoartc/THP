@@ -97,7 +97,7 @@ class Tokenizer:
 
             string_token += str(self.code[self.position])
             self.position += 1
-            print("UHUM" +self.code[self.position])
+            #print("UHUM" +self.code[self.position])
             self.actual = Token("STR", str(string_token))
 
         elif self.code[self.position] == "<" or self.code[self.position] == "?":
@@ -115,12 +115,12 @@ class Tokenizer:
         elif self.code[self.position].isalpha() or self.code[self.position] == "$":
             VAR_token = ""
             while self.position < len(self.code) and (self.code[self.position].isalnum() or self.code[self.position] == "$" or self.code[self.position] == "_"):
-                VAR_token += str(self.code[self.position]).upper()
+                VAR_token += str(self.code[self.position])
                 self.position += 1
 
             reserved_words = ["ECHO", "WHILE", "IF", "ELSE", "READLINE", "TRUE", "FALSE", "AND", "OR", "FUNCTION", "RETURN"]
-            if VAR_token in reserved_words:
-                self.actual = Token(VAR_token, VAR_token)
+            if VAR_token.upper() in reserved_words:
+                self.actual = Token(VAR_token.upper(), VAR_token.upper())
             else:
                 self.actual = Token("VAR", VAR_token)
         else:
