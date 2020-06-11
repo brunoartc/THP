@@ -88,6 +88,18 @@ class Tokenizer:
                 self.position += 1
             self.actual = Token("INT", int(int_token))
 
+        elif self.code[self.position] == "\"":
+            self.position += 1
+            string_token = "\""
+            while self.position < len(self.code) and self.code[self.position] != "\"":
+                string_token += str(self.code[self.position])
+                self.position += 1
+
+            string_token += str(self.code[self.position])
+            self.position += 1
+            print("UHUM" +self.code[self.position])
+            self.actual = Token("STR", str(string_token))
+
         elif self.code[self.position] == "<" or self.code[self.position] == "?":
             php_tags = ""
             while self.position < len(self.code) and (self.code[self.position].isalnum() or self.code[self.position] == "$" or self.code[self.position] == "?" or self.code[self.position] == "<" or self.code[self.position] == ">"):

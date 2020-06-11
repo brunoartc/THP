@@ -68,6 +68,13 @@ class IntVal(Node):
     def evaluate(self, st):
         return (self.value, "INT")
 
+class StrVal(Node):
+    def __init__(self, value):
+        self.value = value
+
+    def evaluate(self, st):
+        return (self.value, "STR")
+
 class Indentifier(Node):
     def __init__(self, value):
         self.value = value

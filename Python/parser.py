@@ -242,7 +242,12 @@ class Parser:
         if Parser.tokens.actual.type == "INT":
             output = IntVal(Parser.tokens.actual.value)
             Parser.tokens.selectNext()
+        
+        elif Parser.tokens.actual.type == "STR":
+            output = StrVal(Parser.tokens.actual.value)
+            Parser.tokens.selectNext()
 
+        
         elif Parser.tokens.actual.type == "VAR":
             identi = Parser.tokens.actual.value
             output = Indentifier(Parser.tokens.actual.value)
@@ -319,7 +324,7 @@ class Parser:
             Parser.tokens.selectNext()
 
         else:
-            raise EnvironmentError()
+            raise EnvironmentError(Parser.tokens.actual.value)
         return output
 
     @staticmethod
