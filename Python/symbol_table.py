@@ -8,7 +8,7 @@ class SymbolTable():
         if key not in SymbolTable.table.keys():
             SymbolTable.table[key] = value
         else:
-            raise EnvironmentError()
+            raise EnvironmentError("NAUM PODE, COME UM ABACATE")
 
     def __init__(self, name="Simple"):
         self.name = name

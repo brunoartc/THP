@@ -103,6 +103,8 @@ class Program(Node):
         #print(self.value)
         for child in self.children:
             if (st.name == 'Simple' or SymbolTable.table[st.name][1][0] == None):
+                if (type(child) == Return):
+                    break
                 child.evaluate(st)
             if child == None: #disjuntor de 20 no lugar de 1 de 10 !!!!!!!!DONT DO DIS
                 pass
@@ -116,7 +118,9 @@ class Print(Node):
         self.children = children
 
     def evaluate(self, st):
-        print(self.children[0].evaluate(st)[0])
+        vall = self.children[0].evaluate(st)[0]
+        if (vall != None):
+            print(self.children[0].evaluate(st)[0])
 
 class While(Node):
     
