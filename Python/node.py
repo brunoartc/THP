@@ -20,11 +20,13 @@ class BinOp(Node):
 
         
 
-        if child_type[0] == "INT" or child_type[1] == "INT" or child_type[0] == "BOOL" or child_type[1] == "BOOL":
+        if child_type[0] == "INT" or child_type[1] == "INT" or child_type[0] == "BOOL" or child_type[1] == "BOOL" or child_type[0] == "STR" or child_type[1] == "STR" :
             if self.value == "-":
                 return (child_value[0] - child_value[1], "INT")
             elif self.value == "+":
                 return (child_value[0] + child_value[1], "INT")
+            elif self.value == ".":
+                return (str(child_value[0]) + str(child_value[1]), "STR")
             elif self.value == "*":
                 return (child_value[0] * child_value[1], "INT")
             elif self.value == "/":

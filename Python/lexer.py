@@ -73,6 +73,10 @@ class Tokenizer:
             self.actual = Token("VIRGULOKO", ",")
             self.position += 1
 
+        elif self.code[self.position] == ".":
+            self.actual = Token("AUNOP", ".")
+            self.position += 1
+
         elif self.code[self.position] == ";":
             self.actual = Token("COMMANDEND", ";")
             self.position += 1
@@ -90,12 +94,12 @@ class Tokenizer:
 
         elif self.code[self.position] == "\"":
             self.position += 1
-            string_token = "\""
+            string_token = ""
             while self.position < len(self.code) and self.code[self.position] != "\"":
                 string_token += str(self.code[self.position])
                 self.position += 1
 
-            string_token += str(self.code[self.position])
+            #string_token += str(self.code[self.position])
             self.position += 1
             #print("UHUM" +self.code[self.position])
             self.actual = Token("STR", str(string_token))
@@ -114,9 +118,11 @@ class Tokenizer:
 
         elif self.code[self.position].isalpha() or self.code[self.position] == "$":
             VAR_token = ""
-            while self.position < len(self.code) and (self.code[self.position].isalnum() or self.code[self.position] == "$" or self.code[self.position] == "_"):
-                VAR_token += str(self.code[self.position])
-                self.position += 1
+            if (not self.code[self.position+1].isnumeric()):
+
+                while self.position < len(self.code) and (self.code[self.position].isalnum() or self.code[self.position] == "$" or self.code[self.position] == "_"):
+                    VAR_token += str(self.code[self.position])
+                    self.position += 1
 
             reserved_words = ["ECHO", "WHILE", "IF", "ELSE", "READLINE", "TRUE", "FALSE", "AND", "OR", "FUNCTION", "RETURN"]
             if VAR_token.upper() in reserved_words:

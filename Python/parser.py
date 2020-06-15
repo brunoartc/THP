@@ -203,7 +203,7 @@ class Parser:
     def parseExpression():
         output = Parser.parseTerm()
 
-        while Parser.tokens.actual.value in ["+", "-", "OR"]:
+        while Parser.tokens.actual.value in ["+", "-", "OR", "."]:
             if Parser.tokens.actual.value == "+":
                 Parser.tokens.selectNext()
                 output = BinOp("+", [output, Parser.parseTerm()])
@@ -211,6 +211,10 @@ class Parser:
             elif Parser.tokens.actual.value == "-":
                 Parser.tokens.selectNext()
                 output = BinOp("-", [output, Parser.parseTerm()])
+
+            elif Parser.tokens.actual.value == ".":
+                Parser.tokens.selectNext()
+                output = BinOp(".", [output, Parser.parseTerm()])
 
             elif Parser.tokens.actual.value == "OR":
                 Parser.tokens.selectNext()
