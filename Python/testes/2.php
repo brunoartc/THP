@@ -1,7 +1,10 @@
+
 <?php
 {
-$x1 = 3; /* bla bla $x1 = 9999998 */
-$y2 = 4;
-$z_final = $x1 + $y2 *33;
-echo $z_final;
-}?>
+    function direto($x) {
+        return $x;
+        }
+    $a = direto(42);
+    echo $a;
+}
+?>
