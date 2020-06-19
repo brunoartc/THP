@@ -19,7 +19,7 @@ class Parser:
             Parser.tokens.selectNext()
             while Parser.tokens.actual.value != "?>":
                 #print(Parser.tokens.actual.value)
-                commands.append(Parser.parseCommand())
+                commands.append(Parser.parseBlock())
                 
         else:
             raise EnvironmentError()

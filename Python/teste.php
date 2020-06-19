@@ -1,1 +1,18 @@
-<?php $i = READLINE; while ( $i<10 ) {$i = $i + 1; if ($i - 3 == 0) {echo $i;} else { echo 1;}}?>
+<?php
+{
+    function soma($x, $y) {
+        function echoes($b) {
+            echo $b;
+            }
+        $a = $x + $y;
+        echoes($a);
+        return $a;
+        }
+    $a = 3;
+    $b = soma($a, 4);
+    echo $b;
+    echoes($a);
+    $c = soma($b, $a); 
+    
+}
+?>
