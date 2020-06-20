@@ -1,3 +1,4 @@
+
 <?php
 {
     function soma($x, $y) {
@@ -12,7 +13,7 @@
     $b = soma($a, 4);
     echo $b;
     echoes($a);
-   
+    
     
 }
 ?>

@@ -103,7 +103,9 @@ class Program(Node):
         #print(self.value)
         
         for child in self.children:
+            
             child.evaluate(st)
+            
             if (st.name == 'Simple' or SymbolTable.table[st.name][1][0] == None):
                 pass
             if child == None: #disjuntor de 20 no lugar de 1 de 10 !!!!!!!!DONT DO DIS
@@ -237,4 +239,6 @@ class Return(Node):
         self.children = children
 
     def evaluate(self, st):
-        SymbolTable.table[st.name][1] = (self.children[0].evaluate(st)[0], 'INT')
+        if ( SymbolTable.table[st.name][1][0] == None):
+            #print("SIM")
+            SymbolTable.table[st.name][1] = (self.children[0].evaluate(st)[0], 'INT')
