@@ -380,4 +380,5 @@ class Parser:
 
         res.evaluate(st)
 
-        print("\n".join(asm) + "POP EBP\nMOV EAX, 1\nINT 0x80\n")
+        with open("program.asm", "w") as file:
+            file.write("\n".join(asm) + "POP EBP\nMOV EAX, 1\nINT 0x80\n")
